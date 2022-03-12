@@ -1,5 +1,7 @@
 // const express = require("express"); // importing 3rd party packages
 import express from 'express';
+import {MongoClient} from "mongodb";
+
 const app = express();
 
 const PORT = 4000;
@@ -74,6 +76,14 @@ const movies = [
     trailer: "https://www.youtube.com/embed/NgsQ8mVkN8w",
   },
 ];
+
+const MONGO_URL = "mongodb://localhost";
+async function createConnection() {
+    const client = new MongoClient(MONGO_URL);
+    await client.connect();
+    console.log("Mongo is connected!");
+}
+createConnection();
 
 app.get("/", function (req, res) {
   // request, response
