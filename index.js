@@ -79,6 +79,9 @@ const movies = [
 
 app.use(express.json());
 
+
+// Create connection between DB and Node -
+
 const MONGO_URL = "mongodb://localhost";
 async function createConnection() {
   const client = new MongoClient(MONGO_URL);
@@ -86,7 +89,9 @@ async function createConnection() {
   console.log("Mongo is connected!");
   return client;
 }
+
 const client = await createConnection();
+
 
 // What to display when url is - https://localhost:4000
 
@@ -95,11 +100,13 @@ app.get("/", function (req, res) {
   res.send("Hello, 🌏🙋‍♂️💓👍😂💪");
 });
 
+
 // What to display when url is - https://localhost:4000/movies
 
 // app.get("/movies", function (req, res) {
 //   res.send(movies);
 // });
+
 
 // What to display when url is - https://localhost:4000/movies/103
 
@@ -107,6 +114,7 @@ app.get("/", function (req, res) {
 //     console.log(req.params.id);
 //     res.send(movies.filter((movie) => movie.id === req.params.id));
 // })
+
 
 // What to fetch from DB and display when url is - https://localhost:4000/movies
 
@@ -119,6 +127,7 @@ app.get("/movies", async function (req, res) {
   movie ? res.send(movie) : res.status(404).send("Movie not found!");
 });
 
+
 // What to fetch from DB and display when url is - https://localhost:4000/movies/104
 
 app.get("/movies/:id", async function (req, res) {
@@ -129,6 +138,7 @@ app.get("/movies/:id", async function (req, res) {
   movie ? res.send(movie) : res.status(404).send("Movie not found!");
 });
 
+
 // Insert new movies into database -
 
 app.post("/movies", async function (req, res) {
@@ -138,6 +148,28 @@ app.post("/movies", async function (req, res) {
     .db("movies")
     .collection("movies")
     .insertMany(newMovies);
+  res.send(result);
+});
+
+
+// Deleting the movie from DB -
+
+app.delete("/movies/:id", async function (req, res) {
+  const result = await client
+    .db("movies")
+    .collection("movies")
+    .deleteOne({ id: req.params.id });
+  res.send(result);
+});
+
+
+// Updating the movie details in DB -
+
+app.put("/movies/:id", async function (req, res) {
+  const result = await client
+    .db("movies")
+    .collection("movies")
+    .updateOne({ id: req.params.id }, { $set: req.body });
   res.send(result);
 });
 
