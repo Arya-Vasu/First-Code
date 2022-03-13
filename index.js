@@ -1,6 +1,6 @@
 // const express = require("express"); // importing 3rd party packages
-import express from 'express';
-import {MongoClient} from "mongodb";
+import express from "express";
+import { MongoClient } from "mongodb";
 
 const app = express();
 
@@ -77,26 +77,68 @@ const movies = [
   },
 ];
 
+app.use(express.json());
+
 const MONGO_URL = "mongodb://localhost";
 async function createConnection() {
-    const client = new MongoClient(MONGO_URL);
-    await client.connect();
-    console.log("Mongo is connected!");
+  const client = new MongoClient(MONGO_URL);
+  await client.connect();
+  console.log("Mongo is connected!");
+  return client;
 }
-createConnection();
+const client = await createConnection();
+
+// What to display when url is - https://localhost:4000
 
 app.get("/", function (req, res) {
   // request, response
   res.send("Hello, 🌏🙋‍♂️💓👍😂💪");
 });
 
-app.get("/movies", function (req, res) {
-    res.send(movies);
-})
+// What to display when url is - https://localhost:4000/movies
 
-app.get("/movies/:id", function (req, res) {
-    console.log(req.params.id);
-    res.send(movies.filter((movie) => movie.id === req.params.id));
-})
+// app.get("/movies", function (req, res) {
+//   res.send(movies);
+// });
+
+// What to display when url is - https://localhost:4000/movies/103
+
+// app.get("/movies/:id", function (req, res) {
+//     console.log(req.params.id);
+//     res.send(movies.filter((movie) => movie.id === req.params.id));
+// })
+
+// What to fetch from DB and display when url is - https://localhost:4000/movies
+
+app.get("/movies", async function (req, res) {
+  const movie = await client
+    .db("movies")
+    .collection("movies")
+    .find({})
+    .toArray();
+  movie ? res.send(movie) : res.status(404).send("Movie not found!");
+});
+
+// What to fetch from DB and display when url is - https://localhost:4000/movies/104
+
+app.get("/movies/:id", async function (req, res) {
+  const movie = await client
+    .db("movies")
+    .collection("movies")
+    .findOne({ id: req.params.id });
+  movie ? res.send(movie) : res.status(404).send("Movie not found!");
+});
+
+// Insert new movies into database -
+
+app.post("/movies", async function (req, res) {
+  const newMovies = req.body;
+  console.log(newMovies);
+  const result = await client
+    .db("movies")
+    .collection("movies")
+    .insertMany(newMovies);
+  res.send(result);
+});
 
 app.listen(PORT, () => console.log(`Server is started in ${PORT}`)); // Port #
